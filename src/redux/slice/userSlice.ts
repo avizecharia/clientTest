@@ -19,7 +19,7 @@ export const fetchLogin = createAsyncThunk(
     "user/login",
     async (user: { username: string; password: string }, thunkApi) => {
       try {
-        const res = await fetch("http://localhost:2222/api/users/login", {
+        const res = await fetch("http://localhost:7770/api/user/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -63,6 +63,29 @@ export const fetchLogin = createAsyncThunk(
         }
       }
     );
+export const fetchGetUser = createAsyncThunk(
+  'user/getUser',
+  async (userId:string,thunkApi) => {
+    try {
+      const res = await fetch(`http://localhost:7770/api/user/getuser/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (res.status != 200) {
+        thunkApi.rejectWithValue("Cant get user ,please try again");
+        return
+      }
+
+      const data = await res.json();
+        return data 
+    } catch (error) {
+      thunkApi.rejectWithValue(`Cant create new user ,please try again${error}`);
+      
+    }
+  }
+)
   
   
 const userSlice = createSlice({
@@ -74,8 +97,6 @@ const userSlice = createSlice({
       state.status = DataStatus.IDLE
       state.user =  null
       }
-        
-      
     },
     extraReducers: (builder: ActionReducerMapBuilder<UserState>) => {
       builder.addCase(fetchLogin.pending,(state,action)=> {
@@ -102,7 +123,19 @@ const userSlice = createSlice({
         state.status = DataStatus.FAILED
         state.error = action.error as string
         state.user = null
-    })
+    }).addCase(fetchGetUser.pending,(state,action)=> {
+      state.status = DataStatus.LOADING
+      state.error = null
+      state.user = null
+  }).addCase(fetchGetUser.fulfilled,(state,action)=> {
+      state.status = DataStatus.SUCCCESS
+      state.error = null
+      state.user = action.payload as unknown as IUser
+  }).addCase(fetchGetUser.rejected,(state,action)=> {
+      state.status = DataStatus.FAILED
+      state.error = action.error as string
+      state.user = null
+  })
     },
   });
   
