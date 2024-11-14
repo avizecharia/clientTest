@@ -22,7 +22,7 @@ export default function login() {
     await dis(fetchLogin({ username, password }))
   }
   return (
-    <div>
+    <div className="login-register-page">
       <input
         type="text"
         placeholder="User Name"

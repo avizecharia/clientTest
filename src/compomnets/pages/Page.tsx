@@ -4,6 +4,7 @@ import {
   fetchGetDefenceAttack,
   fetchGetLaunche,
   fetchLunche,
+  fetchUpdateDeffenceAmount,
 } from "../../redux/slice/launche";
 import { Route, useNavigate } from "react-router";
 import { ILunche } from "../../types/ILunche";
@@ -22,7 +23,7 @@ export default function Page() {
   const [area, setArea] = useState("North");
   const dis = useAppDispatch();
   const navigate = useNavigate();
-
+  const [timing, setTiming] = useState<HTMLInputElement>();
   useEffect(() => {
     if (!user?._id) {
       navigate("/login");
@@ -30,42 +31,29 @@ export default function Page() {
     }
     if (user?.area) {
       dis(fetchGetDefenceAttack(user.area));
-    } else {
+    } else if (user._id) {
       dis(fetchGetLaunche(user?._id!));
     }
   }, []);
   const { launches } = useAppSelector((state: RootState) => state.launch);
 
   const handelDeffence = async (launche: ILunche) => {
-    
     const myFastestMissile = myFastmissle(user?.resources!);
-    const myLaseymissile = lasyMissile(user?.resources!)
-    if(myLaseymissile.speed <= launche.time){
-      console.log("plpllp");
-      // להוריד מהUSER AMOUNT
-      const details = {newstatus:"intercepted",roketType:myLaseymissile.name}
-      console.log(details);
-      
-      try {
-        const res = await fetch(
-          `http://localhost:7770/api/launche/status/${launche._id}`,
-          {
-            method: "POST",
-            headers: { authorization: localStorage.token },
-            body: JSON.stringify(details)
-          },
-        );
-      } catch (error) {
-        console.log(error);
-      }
-      await dis(fetchGetUser(user?._id!));
+    const myLaseymissile = lasyMissile(user?.resources!);
+    if (myLaseymissile.speed <= launche.time) {
+      const details = {
+        newStatus: "intercepted",
+        roketType: myLaseymissile.name,
+        launcheId: launche._id!,
+        myUserId: user?._id,
+      };
+      await dis(fetchUpdateDeffenceAmount(details));
+      dis(fetchGetUser(user?._id!));
       socket.emit("newLaunche");
       //SET INTERVAK אחרי כמה שניות לעשות בקשה לשנות סטטוס
     }
-    // if (myFastestMissile >= launche.time) {
-
-    // }
     //אם לא יורט לשנות סטטוס לפגע
+    
   };
 
   const handelLunche = async (rocketType: string) => {
@@ -85,22 +73,25 @@ export default function Page() {
     await dis(fetchGetUser(user?._id!));
     socket.emit("newLaunche");
   };
+
   useEffect(() => {
     socket.on("newLaunchHasOccurred", () => {
       if (user?.area) {
         dis(fetchGetDefenceAttack(user.area));
-      } else {
+
+        // toast.info("Someone somewhere just voted");
+      } else if (user?._id) {
         dis(fetchGetLaunche(user?._id!));
       }
-      // toast.info("Someone somewhere just voted");
+      
     });
   }, []);
   return (
-    <div>
+    <div className="page">
+      <div className="upPage">
       <h1>
         {user?.origin} {user?.area}
       </h1>
-      <div>
         {!user?.area && (
           <select
             name=""
@@ -114,12 +105,14 @@ export default function Page() {
             <option value="WestBank">WestBank</option>
           </select>
         )}
-
         {user?.resources.map((r: RoketType) =>
           user.area == null ? (
             <>
               <button
-                onClick={() => handelLunche(r.name)}
+                onClick={() => {
+                  handelLunche(r.name);
+                  
+                }}
                 disabled={r.amount <= 0}
               >
                 {r.name} {r.amount}
@@ -132,7 +125,7 @@ export default function Page() {
           )
         )}
       </div>
-      <div>
+      <div className="main">
         <h1>Launched Rocket</h1>
         <table>
           <tr>
@@ -141,9 +134,11 @@ export default function Page() {
             <th>Status</th>
           </tr>
           {launches.map((l: ILunche) => (
-            <tr>
+            <tr className="card">
               <td>{l.rocket}</td>
-              <td>{l.time}</td>
+              <td>
+                {l.time}
+              </td>
               <td>
                 {l.status}
                 {user?.area != null && l.status == "launched" && (
@@ -153,13 +148,13 @@ export default function Page() {
                       handelDeffence(l);
                     }}
                   >
-                    X
+                    X{" "}
                   </button>
                 )}
               </td>
             </tr>
           ))}
-        </table>
+        </table>{" "}
       </div>
     </div>
   );

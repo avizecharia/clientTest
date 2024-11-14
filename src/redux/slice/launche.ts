@@ -2,6 +2,7 @@ import {
   ActionReducerMapBuilder,
   createAsyncThunk,
   createSlice,
+  PayloadAction,
 } from "@reduxjs/toolkit";
 import { DataStatus, luncheState } from "../../types/redux";
 import { ILunche } from "../../types/ILunche";
@@ -12,36 +13,43 @@ const initialState: luncheState = {
   launches: [],
 };
 
-// //מגן בפעולה 
-// export const fetchUpdateDeffenceAmount = createAsyncThunk(
-//   "lunche/deffenceLunche",
-//   async (details:{newstatus:string,roketType:string,launcheId:string},thunkApi) =>{
-//     try {
-//       const res = await fetch(
-//         `http://localhost:7770/api/launche/status/${details.launcheId}`,
-//         {
-//           method: "POST",
-//           headers: { authorization: localStorage.token },
-//           body: JSON.stringify(details)
-//         },
-//       );
-//       if (res.status != 200) {
-//         thunkApi.rejectWithValue("Cant get the list ,please try again");
-//       }
-//       const data: ILunche[] = await res.json();
-//       console.log(data);
-//       return data;
-//     } catch (error) {
-      
-//     }
-//   }
-// )
+// //מגן בפעולה
+export const fetchUpdateDeffenceAmount = createAsyncThunk(
+  "lunche/deffenceLunche",
+  async (
+    details: {
+      newStatus: string;
+      roketType: string;
+      launcheId: string;
+      myUserId: string | undefined;
+    },
+    thunkApi
+  ) => {
+    try {
+      console.log(details);
 
+      const res = await fetch(
+        `http://localhost:7770/api/launche/status/${details.launcheId}/${details.myUserId}/${details.roketType}`,
+        {
+          method: "POST",
+          headers: { authorization: localStorage.token },
+          body: JSON.stringify(details),
+        }
+      );
+      if (res.status != 200) {
+        thunkApi.rejectWithValue("Cant get the list ,please try again");
+      }
+      const data: ILunche[] = await res.json();
+      console.log(data,"fetchUpdateDeffenceAmount");
+      return data;
+    } catch (error) {}
+  }
+);
 
-// getting your missles that lunche to your  area 
+// getting your missles that lunche to your  area
 export const fetchGetDefenceAttack = createAsyncThunk(
   "lunche/getDefenceAttack",
-  async(area:string,thunkApi)=>{
+  async (area: string, thunkApi) => {
     try {
       const res = await fetch(
         `http://localhost:7770/api/launche/getDefenceAttack/${area}`,
@@ -54,19 +62,20 @@ export const fetchGetDefenceAttack = createAsyncThunk(
         thunkApi.rejectWithValue("Cant get the list ,please try again");
       }
       const data: ILunche[] = await res.json();
-      console.log(data);
+      console.log(data,"fetchGetDefenceAttack");
       return data;
     } catch (error) {
       thunkApi.rejectWithValue(`Cant get the list ,please try again${error}`);
-      
     }
   }
-)
+);
 // get tour list of your launche anemy
 export const fetchGetLaunche = createAsyncThunk(
   "lunche/getList",
   async (userId: string, thunkApi) => {
     try {
+      console.log(userId, "useriddddd");
+
       const res = await fetch(
         `http://localhost:7770/api/launche/getYourLaunche/${userId}`,
         {
@@ -78,7 +87,7 @@ export const fetchGetLaunche = createAsyncThunk(
         thunkApi.rejectWithValue("Cant get the list ,please try again");
       }
       const data: ILunche[] = await res.json();
-      console.log(data);
+      console.log(data,"fetchGetLaunche");
       return data;
     } catch (err) {
       thunkApi.rejectWithValue(`Cant get the list ,please try again${err}`);
@@ -90,12 +99,11 @@ export const fetchLunche = createAsyncThunk(
   "lunche/lunche",
   async (launche: ILunche, thunkApi) => {
     try {
-
       const res = await fetch(`http://localhost:7770/api/launche/launch`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "authorization": localStorage.token,
+          authorization: localStorage.token,
         },
         body: JSON.stringify(launche),
       });
@@ -111,7 +119,14 @@ export const fetchLunche = createAsyncThunk(
 const launcheSlice = createSlice({
   name: "launche",
   initialState,
-  reducers: {},
+  reducers: {
+    updateTime:(state,action:PayloadAction<{id:string |undefined,timeLeft:number}>)=>{
+      const launche = state.launches.find((lau) => lau._id == action.payload.id)
+      if(launche){
+        launche.time = action.payload.timeLeft
+      }
+    }
+  },
   extraReducers: (builder: ActionReducerMapBuilder<luncheState>) => {
     builder
       .addCase(fetchGetLaunche.pending, (state, action) => {
@@ -128,7 +143,8 @@ const launcheSlice = createSlice({
         state.status = DataStatus.FAILED;
         state.error = action.error as string;
         state.launches = [];
-      }).addCase(fetchGetDefenceAttack.pending, (state, action) => {
+      })
+      .addCase(fetchGetDefenceAttack.pending, (state, action) => {
         state.status = DataStatus.LOADING;
         state.error = null;
         state.launches = [];
@@ -139,6 +155,21 @@ const launcheSlice = createSlice({
         state.launches = action.payload as unknown as ILunche[];
       })
       .addCase(fetchGetDefenceAttack.rejected, (state, action) => {
+        state.status = DataStatus.FAILED;
+        state.error = action.error as string;
+        state.launches = [];
+      })
+      .addCase(fetchUpdateDeffenceAmount.pending, (state, action) => {
+        state.status = DataStatus.LOADING;
+        state.error = null;
+        state.launches = [];
+      })
+      .addCase(fetchUpdateDeffenceAmount.fulfilled, (state, action) => {
+        state.status = DataStatus.SUCCCESS;
+        state.error = null;
+        state.launches = action.payload as unknown as ILunche[];
+      })
+      .addCase(fetchUpdateDeffenceAmount.rejected, (state, action) => {
         state.status = DataStatus.FAILED;
         state.error = action.error as string;
         state.launches = [];

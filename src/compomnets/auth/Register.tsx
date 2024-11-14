@@ -22,7 +22,7 @@ export default function register() {
     navigate('/login')
   }
   return (
-    <div>
+    <div className='login-register-page'>
       <input type="text"placeholder='username' value={username} onChange={(e)=> setUsername(e.target.value)} />
       <input type="text"placeholder='password'value={password} onChange={(e)=> setPassword(e.target.value)} />
       <select name="" id="" value={origin} onChange={(e) => setOrigin(e.target.value)}>
