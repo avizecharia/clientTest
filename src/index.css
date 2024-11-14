@@ -1,0 +1,73 @@
+.app{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 140px;
+}
+.nav{
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    justify-content: space-evenly;
+    background-color: #db3a3a;
+}
+.page{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+}
+h1 {
+    font-size: 3.2em;
+    line-height: 1.1;
+    align-items: center;
+    background-color: #a32727;
+  }
+.upPage{
+    background-color: #312323;
+    padding: 10px;
+    border-radius: 1em;
+}
+button{
+    border-radius: 10px;
+}
+.main{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    border-radius: 10px;
+    background-color: #8d4d4d;
+    padding: 10px;
+}
+.card{
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 10px;
+}
+tr{
+   background-color: #8a3434;
+}
+
+.login-register-page{
+    height: 40vh;
+    width: 50vw;
+    background-color: #033e4d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    justify-content: space-evenly;
+    border-radius: 10px;
+}
+.login-register-page > input  {
+    border-radius: 10px;
+    width: 70%;
+    height: 10%;
+}
+select {
+    border-radius: 10px;
+    width: 60%;
+    height: 10%;
+}
