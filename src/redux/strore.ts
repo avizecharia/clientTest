@@ -1,10 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit"
 import userSlice from "./slice/userSlice"
 import { useDispatch, useSelector } from "react-redux"
+import launcheSlice from "./slice/launche"
 
 const store  = configureStore({
     reducer:{
         user:userSlice.reducer,
+        launch:launcheSlice.reducer
     }
 })
 export type RootState = ReturnType<typeof store.getState>
