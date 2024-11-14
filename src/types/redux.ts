@@ -1,3 +1,4 @@
+import { ILunche } from "./ILunche";
 import { IUser } from "./IUser";
 
 
@@ -12,4 +13,9 @@ export interface UserState {
     error: string | null;
     status: DataStatus;
     user: null | IUser;
+  }
+  export interface luncheState {
+    error: string | null;
+    status: DataStatus;
+    launches: ILunche[];
   }
